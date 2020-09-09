@@ -1,28 +1,56 @@
 import express from "express";
+import "express-async-errors";
 import { json } from "body-parser";
+import { currentUserRouter } from "./routes/current-user";
+import { signinRouter } from "./routes/singin";
+import { signupRouter } from "./routes/signup";
+import { signoutRouter } from "./routes/signout";
+import { errorHandler } from "./middlewares/error-handler";
+import { NotFoundError } from "./error/not-found-error";
+import mongooose from "mongoose";
+import cookieSession from "cookie-session";
 
 const app = express();
+app.set("trust proxy", true);
 app.use(json());
 
-app.get("/api/users/currentuser", (req, res) => {
-  res.send("Hi");
+app.use(
+  cookieSession({
+    secure: true,
+    signed: false,
+  })
+);
+
+app.use(currentUserRouter);
+app.use(signinRouter);
+app.use(signupRouter);
+app.use(signoutRouter);
+
+app.get("*", async () => {
+  throw new NotFoundError();
 });
 
-app.post("/api/users/signin", (req, res) => {
-  const body = req.body;
-  res.send("user authenticated");
-});
+app.use(errorHandler);
 
-app.post("/api/users/signup", (req, res) => {
-  const body = req.body;
-  res.send("user created");
-});
+const start = async () => {
+  if (!process.env.JWT_KEY) {
+    throw new Error("JWT_KEY must be defined");
+  }
 
-app.post("/api/users/signout", (req, res) => {
-  const body = req.body;
-  res.send("user  signedout");
-});
+  try {
+    await mongooose.connect("mongodb://auth-mongodb-srv:27017/auth", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    });
+    console.log("auth db connected.");
+  } catch (error) {
+    console.error(error);
+  }
 
-app.listen(3000, () => {
-  console.log("Listening on 3000 send request.");
-});
+  app.listen(3000, () => {
+    console.log("Listening on 3000 send request.");
+  });
+};
+
+start();
