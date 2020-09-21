@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: web-react-client-depl
+spec:
+ replicas: 1
+ selector:
+    matchLabels:
+        app: web-react-client
+ template:
+    metadata:
+        labels: 
+            app: web-react-client
+    spec:
+        containers:
+            - name: web-react-client
+              image: nishankbangera/react-nxjs-client            
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: web-react-client-srv
+spec:
+ selector:
+    app: web-react-client
+ ports:
+    - name: web-react-client
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+ 
+
+
+  

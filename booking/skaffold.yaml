@@ -16,5 +16,14 @@ build:
             manual:
                 - src: 'src/**/*.ts'
                   dest: .
+        - image: nishankbangera/react-nxjs-client
+          context: client
+          docker: 
+            dockerfile: Dockerfile
+          sync:
+            manual:
+                - src: '**/*.js'
+                  dest: .
+
 
 
